@@ -1,0 +1,588 @@
+{
+  "patterns": {
+    "reflex": "Reflex drills (syntax you must type without thinking)",
+    "p01_hashing": "Counting & hashing",
+    "p02_two_pointers": "Two pointers",
+    "p03_sliding_window": "Sliding window",
+    "p04_prefix_sums": "Prefix sums",
+    "p05_binary_search": "Binary search",
+    "p06_stack": "Stack",
+    "p07_bfs_grid": "BFS / grids",
+    "p08_sort_greedy": "Sort + greedy / intervals",
+    "p09_dp": "Dynamic programming",
+    "p10_heap": "Heap / top-K",
+    "p11_strings": "String manipulation"
+  },
+  "drills": [
+    {
+      "id": "r01",
+      "title": "Letter counts with int[26]",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 2,
+      "file": "src/main/java/drills/reflex/LetterCounts.java",
+      "test": "drills.reflex.LetterCountsTest",
+      "statement": "Return an int[26] where index 0 holds how many times 'a' appears in s, index 1 'b', and so on.\nCount only lowercase letters a-z; ignore everything else (uppercase, digits, punctuation).\n\nExample: letterCounts(\"hello\") -> count['l' - 'a'] == 2"
+    },
+    {
+      "id": "k01",
+      "title": "Valid Anagram",
+      "pattern": "p01_hashing",
+      "level": "Easy",
+      "target": 5,
+      "file": "src/main/java/drills/p01_hashing/ValidAnagram.java",
+      "test": "drills.p01_hashing.ValidAnagramTest",
+      "statement": "Return true if t is an anagram of s (same letters, same counts). Both contain only lowercase a-z.\n\nExample: (\"anagram\", \"nagaram\") -> true, (\"rat\", \"car\") -> false"
+    },
+    {
+      "id": "k05",
+      "title": "Valid Palindrome",
+      "pattern": "p02_two_pointers",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p02_two_pointers/ValidPalindrome.java",
+      "test": "drills.p02_two_pointers.ValidPalindromeTest",
+      "statement": "Return true if s reads the same forwards and backwards after lowercasing and removing every\ncharacter that is not a letter or digit.\n\nExample: \"A man, a plan, a canal: Panama\" -> true, \"race a car\" -> false"
+    },
+    {
+      "id": "r02",
+      "title": "Word frequency with HashMap.merge",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/WordFrequency.java",
+      "test": "drills.reflex.WordFrequencyTest",
+      "statement": "Split text into words on any whitespace (spaces, tabs, newlines - possibly several in a row),\nlowercase every word, and return a map word -> number of occurrences. Ignore empty strings.\n\nExample: \"the cat The  dog\" -> {the=2, cat=1, dog=1}"
+    },
+    {
+      "id": "k09",
+      "title": "Max Sum of k Consecutive",
+      "pattern": "p03_sliding_window",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p03_sliding_window/MaxSumOfK.java",
+      "test": "drills.p03_sliding_window.MaxSumOfKTest",
+      "statement": "Return the maximum sum of any k consecutive elements (1 <= k <= n). Return a long.\nMust be O(n): one test has n = 1,000,000 and k = 500,000.\n\nExample: [1, 4, 2, 10, 23, 3, 1, 0, 20], k = 4 -> 39"
+    },
+    {
+      "id": "k13",
+      "title": "Range Sum Queries",
+      "pattern": "p04_prefix_sums",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p04_prefix_sums/RangeSumQueries.java",
+      "test": "drills.p04_prefix_sums.RangeSumQueriesTest",
+      "statement": "Each query is {l, r}. Return a long[] with the sum of a[l..r] (inclusive) for every query.\nMust be O(n + q): one test has 200,000 numbers and 200,000 queries."
+    },
+    {
+      "id": "r03",
+      "title": "Grouping with computeIfAbsent",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/GroupByLength.java",
+      "test": "drills.reflex.GroupByLengthTest",
+      "statement": "Return a map from word length -> list of the words with that length, keeping the words\nin the same order they appear in the input.\n\nExample: [hi, cat, yo, dog] -> {2=[hi, yo], 3=[cat, dog]}"
+    },
+    {
+      "id": "k17",
+      "title": "Binary Search",
+      "pattern": "p05_binary_search",
+      "level": "Easy",
+      "target": 4,
+      "file": "src/main/java/drills/p05_binary_search/BinarySearch.java",
+      "test": "drills.p05_binary_search.BinarySearchTest",
+      "statement": "a is sorted ascending with distinct values. Return the index of x, or -1. Must be O(log n).\n\nExample: [-1, 0, 3, 5, 9, 12], x = 9 -> 4"
+    },
+    {
+      "id": "k21",
+      "title": "Valid Parentheses",
+      "pattern": "p06_stack",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p06_stack/ValidParentheses.java",
+      "test": "drills.p06_stack.ValidParenthesesTest",
+      "statement": "s contains only ()[]{}. Return true if every bracket is closed by the same type, in the\ncorrect order.\n\nExample: \"()[]{}\" -> true, \"([)]\" -> false, \"{[]}\" -> true"
+    },
+    {
+      "id": "r04",
+      "title": "Comparator chaining",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/SortPeople.java",
+      "test": "drills.reflex.SortPeopleTest",
+      "statement": "Return a NEW list of the people sorted by age ascending, then by name alphabetically\nwhen ages are equal. Do not modify the input list."
+    },
+    {
+      "id": "k25",
+      "title": "Number of Islands",
+      "pattern": "p07_bfs_grid",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p07_bfs_grid/NumberOfIslands.java",
+      "test": "drills.p07_bfs_grid.NumberOfIslandsTest",
+      "statement": "grid has '1' (land) and '0' (water). An island is land connected up/down/left/right.\nReturn the number of islands. You may modify the grid.\nOne test is a 1000 x 1000 island - recursive DFS will overflow the stack. Use BFS with a queue."
+    },
+    {
+      "id": "k29",
+      "title": "Merge Intervals",
+      "pattern": "p08_sort_greedy",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p08_sort_greedy/MergeIntervals.java",
+      "test": "drills.p08_sort_greedy.MergeIntervalsTest",
+      "statement": "Merge all overlapping intervals and return them sorted by start. Intervals that only touch\n([1,4] and [4,5]) also merge. The input is NOT sorted.\n\nExample: [[1,3],[2,6],[8,10],[15,18]] -> [[1,6],[8,10],[15,18]]"
+    },
+    {
+      "id": "r05",
+      "title": "Sorting int[][] safely",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/SortPairs.java",
+      "test": "drills.reflex.SortPairsTest",
+      "statement": "Sort the pairs IN PLACE by first value ascending; when first values tie, by second value\nDESCENDING. Return the same array. Values can be anywhere in the int range - a comparator\nthat uses subtraction will overflow and fail."
+    },
+    {
+      "id": "k33",
+      "title": "Climbing Stairs",
+      "pattern": "p09_dp",
+      "level": "Easy",
+      "target": 5,
+      "file": "src/main/java/drills/p09_dp/ClimbingStairs.java",
+      "test": "drills.p09_dp.ClimbingStairsTest",
+      "statement": "You can climb 1 or 2 steps at a time. Return the number of distinct ways to reach step n (n >= 1)\nas a long. n goes up to 90, so plain recursion is far too slow.\n\nExample: n = 3 -> 3 (1+1+1, 1+2, 2+1)"
+    },
+    {
+      "id": "k38",
+      "title": "Top K Frequent Elements",
+      "pattern": "p10_heap",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p10_heap/TopKFrequent.java",
+      "test": "drills.p10_heap.TopKFrequentTest",
+      "statement": "Return the k most frequent values (any order). The answer is guaranteed to be unique.\n\nExample: [1, 1, 1, 2, 2, 3], k = 2 -> [1, 2]"
+    },
+    {
+      "id": "r06",
+      "title": "Binary search skeleton",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/LowerBound.java",
+      "test": "drills.reflex.LowerBoundTest",
+      "statement": "a is sorted ascending (duplicates allowed). Return the first index i with a[i] >= x,\nor a.length if every element is smaller than x. Must be O(log n).\n\nExample: a = [1, 3, 3, 5]: x=3 -> 1, x=4 -> 3, x=6 -> 4"
+    },
+    {
+      "id": "k42",
+      "title": "Run-Length Compression",
+      "pattern": "p11_strings",
+      "level": "Easy",
+      "target": 7,
+      "file": "src/main/java/drills/p11_strings/Compress.java",
+      "test": "drills.p11_strings.CompressTest",
+      "statement": "Replace each run of the same character with the character followed by the run length.\nRuns of length 1 are written as just the character.\n\nExample: \"aaabcc\" -> \"a3bc2\", \"aaaaaaaaaaaa\" -> \"a12\", \"aabbaa\" -> \"a2b2a2\""
+    },
+    {
+      "id": "k02",
+      "title": "Two Sum (unsorted)",
+      "pattern": "p01_hashing",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p01_hashing/TwoSum.java",
+      "test": "drills.p01_hashing.TwoSumTest",
+      "statement": "nums is NOT sorted. Exactly one pair of different indices i < j has nums[i] + nums[j] == target.\nReturn {i, j} with i < j. Must be O(n) - the last test has 200,000 numbers.\n\nExample: [2, 7, 11, 15], target 9 -> {0, 1}"
+    },
+    {
+      "id": "r07",
+      "title": "Prefix sum array",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 2,
+      "file": "src/main/java/drills/reflex/PrefixSums.java",
+      "test": "drills.reflex.PrefixSumsTest",
+      "statement": "prefix(a) returns a long[] of length n + 1 where pre[i] = a[0] + ... + a[i-1] (pre[0] = 0).\nrangeSum(pre, l, r) returns a[l] + ... + a[r] (inclusive) in O(1).\nUse long: sums can exceed the int range."
+    },
+    {
+      "id": "k06",
+      "title": "Remove Duplicates from Sorted Array",
+      "pattern": "p02_two_pointers",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p02_two_pointers/RemoveDuplicates.java",
+      "test": "drills.p02_two_pointers.RemoveDuplicatesTest",
+      "statement": "nums is sorted ascending. Remove duplicates IN PLACE so each value appears once in the first k\npositions (in order), and return k. What is left after position k does not matter.\n\nExample: [0,0,1,1,1,2,2,3,3,4] -> k = 5, nums starts with [0,1,2,3,4]"
+    },
+    {
+      "id": "k10",
+      "title": "Longest Substring Without Repeating Characters",
+      "pattern": "p03_sliding_window",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p03_sliding_window/LongestUniqueSubstring.java",
+      "test": "drills.p03_sliding_window.LongestUniqueSubstringTest",
+      "statement": "Return the length of the longest substring of s with no repeated characters.\n\nExample: \"abcabcbb\" -> 3 (\"abc\"), \"bbbbb\" -> 1, \"pwwkew\" -> 3\nWatch out for \"abba\": the left edge must never move backwards."
+    },
+    {
+      "id": "r08",
+      "title": "Split, reverse, join",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/ReverseWords.java",
+      "test": "drills.reflex.ReverseWordsTest",
+      "statement": "Reverse the order of the words in s. Words are separated by one or more spaces; the result\nhas single spaces between words and no leading/trailing spaces.\n\nExample: \"  the sky  is blue \" -> \"blue is sky the\""
+    },
+    {
+      "id": "k14",
+      "title": "Find Pivot Index",
+      "pattern": "p04_prefix_sums",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p04_prefix_sums/PivotIndex.java",
+      "test": "drills.p04_prefix_sums.PivotIndexTest",
+      "statement": "Return the leftmost index i where the sum of everything strictly left of i equals the sum of\neverything strictly right of i, or -1. (An empty side sums to 0.)\n\nExample: [1, 7, 3, 6, 5, 6] -> 3; [1, 2, 3] -> -1; [2, 1, -1] -> 0"
+    },
+    {
+      "id": "k18",
+      "title": "First and Last Position",
+      "pattern": "p05_binary_search",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p05_binary_search/SearchRange.java",
+      "test": "drills.p05_binary_search.SearchRangeTest",
+      "statement": "a is sorted ascending (duplicates allowed). Return {first, last} index of x, or {-1, -1}.\nMust be O(log n) per call.\n\nExample: [5, 7, 7, 8, 8, 10], x = 8 -> {3, 4}\nHint: two lower-bound searches: lowerBound(x) and lowerBound(x + 1) - 1."
+    },
+    {
+      "id": "r09",
+      "title": "PriorityQueue min-heap of size k",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/KthLargest.java",
+      "test": "drills.reflex.KthLargestTest",
+      "statement": "Return the k-th largest element of a (1-based: k = 1 is the maximum). Duplicates count\nseparately. Use a min-heap that never holds more than k elements.\n\nExample: [3, 2, 1, 5, 6, 4], k = 2 -> 5"
+    },
+    {
+      "id": "k22",
+      "title": "Daily Temperatures (next greater element)",
+      "pattern": "p06_stack",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p06_stack/DailyTemperatures.java",
+      "test": "drills.p06_stack.DailyTemperaturesTest",
+      "statement": "For each day i, out[i] = how many days until a strictly warmer temperature, or 0 if never.\nMust be O(n): one test has 100,000 days.\n\nExample: [73, 74, 75, 71, 69, 72, 76, 73] -> [1, 1, 4, 2, 1, 1, 0, 0]\nHint: a stack of indices still waiting for a warmer day (monotonic stack)."
+    },
+    {
+      "id": "k26",
+      "title": "Shortest Path in Binary Matrix",
+      "pattern": "p07_bfs_grid",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p07_bfs_grid/ShortestPathBinaryMatrix.java",
+      "test": "drills.p07_bfs_grid.ShortestPathBinaryMatrixTest",
+      "statement": "n x n grid of 0 (open) and 1 (blocked). Moving in any of the 8 directions, return the length of\nthe shortest path from top-left to bottom-right counted in CELLS (start and end included),\nor -1 if there is none (including when start or end is blocked).\n\nExample: [[0,1],[1,0]] -> 2"
+    },
+    {
+      "id": "r10",
+      "title": "BFS on a grid",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 5,
+      "file": "src/main/java/drills/reflex/GridBfs.java",
+      "test": "drills.reflex.GridBfsTest",
+      "statement": "grid[r][c] is '.' (open) or '#' (wall). Starting at (sr, sc), return an int[R][C] with the\nminimum number of 4-directional steps to every cell. Walls and unreachable cells get -1."
+    },
+    {
+      "id": "k30",
+      "title": "Meeting Rooms II",
+      "pattern": "p08_sort_greedy",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p08_sort_greedy/MeetingRooms.java",
+      "test": "drills.p08_sort_greedy.MeetingRoomsTest",
+      "statement": "Each interval is {start, end}. Return the minimum number of rooms needed so no two meetings\nshare a room at the same time. A meeting ending at 5 frees the room for one starting at 5.\n\nExample: [[0,30],[5,10],[15,20]] -> 2\nHint: sort by start; a min-heap holds end times of rooms in use."
+    },
+    {
+      "id": "k34",
+      "title": "Coin Change (fewest coins)",
+      "pattern": "p09_dp",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p09_dp/CoinChange.java",
+      "test": "drills.p09_dp.CoinChangeTest",
+      "statement": "Return the fewest coins needed to make amount, using unlimited coins of each value, or -1 if\nit cannot be made. amount = 0 needs 0 coins.\n\nExample: coins [1, 2, 5], amount 11 -> 3 (5 + 5 + 1)"
+    },
+    {
+      "id": "r11",
+      "title": "BufferedReader + StringTokenizer",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/FastInput.java",
+      "test": "drills.reflex.FastInputTest",
+      "statement": "input looks exactly like HackerRank stdin: the first line is n, the second line holds n\nintegers separated by one or more spaces. Return their sum as a long.\nRead it with BufferedReader (over a StringReader) and StringTokenizer - the same code you\nwould write in main() with System.in.\n\nExample: \"3\\n1 2 3\\n\" -> 6"
+    },
+    {
+      "id": "k39",
+      "title": "K Closest Points to Origin",
+      "pattern": "p10_heap",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p10_heap/KClosestPoints.java",
+      "test": "drills.p10_heap.KClosestPointsTest",
+      "statement": "Return the k points closest to (0, 0) by Euclidean distance (any order). The answer is unique.\nCoordinates can be large: x*x + y*y overflows an int - compare squared distances as long.\n\nExample: [[3,3],[5,-1],[-2,4]], k = 2 -> [[3,3],[-2,4]]"
+    },
+    {
+      "id": "k43",
+      "title": "Caesar Cipher",
+      "pattern": "p11_strings",
+      "level": "Easy",
+      "target": 7,
+      "file": "src/main/java/drills/p11_strings/CaesarCipher.java",
+      "test": "drills.p11_strings.CaesarCipherTest",
+      "statement": "Shift every letter k places through the alphabet, wrapping around and keeping its case.\nNon-letters stay the same. k can be negative or larger than 26.\n\nExample: (\"Hello, World!\", 5) -> \"Mjqqt, Btwqi!\", (\"abc\", -1) -> \"zab\"\nHint: Math.floorMod handles negative shifts."
+    },
+    {
+      "id": "r12",
+      "title": "Two pointers on a sorted array",
+      "pattern": "reflex",
+      "level": "Reflex",
+      "target": 3,
+      "file": "src/main/java/drills/reflex/TwoSumSorted.java",
+      "test": "drills.reflex.TwoSumSortedTest",
+      "statement": "a is sorted ascending and has exactly one pair of different indices i < j with\na[i] + a[j] == target. Return {i, j}. Use two pointers (O(n), O(1) extra space).\n\nExample: [1, 2, 4, 7, 11], target 9 -> {1, 3}"
+    },
+    {
+      "id": "k03",
+      "title": "First Unique Character",
+      "pattern": "p01_hashing",
+      "level": "Easy",
+      "target": 5,
+      "file": "src/main/java/drills/p01_hashing/FirstUniqueChar.java",
+      "test": "drills.p01_hashing.FirstUniqueCharTest",
+      "statement": "Return the index of the first character in s that appears exactly once, or -1 if none.\ns contains only lowercase a-z.\n\nExample: \"leetcode\" -> 0, \"loveleetcode\" -> 2, \"aabb\" -> -1"
+    },
+    {
+      "id": "k07",
+      "title": "3Sum",
+      "pattern": "p02_two_pointers",
+      "level": "Medium",
+      "target": 15,
+      "file": "src/main/java/drills/p02_two_pointers/ThreeSum.java",
+      "test": "drills.p02_two_pointers.ThreeSumTest",
+      "statement": "Return every unique triplet [a, b, c] of values from nums (different indices) with a + b + c == 0.\nNo duplicate triplets. Order of triplets / order inside a triplet does not matter.\nMust be O(n^2): one test has 3,000 numbers.\n\nExample: [-1, 0, 1, 2, -1, -4] -> [[-1, -1, 2], [-1, 0, 1]]\nHint: sort, fix the first value, two-pointer the rest, skip repeated values."
+    },
+    {
+      "id": "k11",
+      "title": "Minimum Size Subarray Sum",
+      "pattern": "p03_sliding_window",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p03_sliding_window/MinSubarrayLen.java",
+      "test": "drills.p03_sliding_window.MinSubarrayLenTest",
+      "statement": "All numbers are positive. Return the length of the shortest contiguous subarray whose sum is\n>= target, or 0 if there is none. Must be O(n): one test has 1,000,000 numbers.\n\nExample: target 7, [2, 3, 1, 2, 4, 3] -> 2 ([4, 3])"
+    },
+    {
+      "id": "k15",
+      "title": "Subarray Sum Equals K",
+      "pattern": "p04_prefix_sums",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p04_prefix_sums/SubarraySumEqualsK.java",
+      "test": "drills.p04_prefix_sums.SubarraySumEqualsKTest",
+      "statement": "Return how many contiguous subarrays sum to exactly k. Numbers can be negative, so a sliding\nwindow does NOT work. Return a long - the answer can exceed the int range.\nMust be O(n): one test has 200,000 numbers.\n\nExample: [1, 1, 1], k = 2 -> 2; [1, -1, 0], k = 0 -> 3\nHint: prefix sums + a HashMap counting how often each prefix sum has appeared."
+    },
+    {
+      "id": "k19",
+      "title": "Integer Square Root",
+      "pattern": "p05_binary_search",
+      "level": "Easy",
+      "target": 7,
+      "file": "src/main/java/drills/p05_binary_search/IntSqrt.java",
+      "test": "drills.p05_binary_search.IntSqrtTest",
+      "statement": "Return floor(sqrt(x)) for x >= 0 WITHOUT Math.sqrt or Math.pow.\nBinary search on the answer - and watch out: mid * mid overflows an int.\n\nExample: 8 -> 2, 2147395599 -> 46339"
+    },
+    {
+      "id": "k23",
+      "title": "Evaluate Reverse Polish Notation",
+      "pattern": "p06_stack",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p06_stack/EvalRPN.java",
+      "test": "drills.p06_stack.EvalRPNTest",
+      "statement": "Evaluate an expression in Reverse Polish Notation. Tokens are integers (possibly negative,\nlike \"-11\") or one of + - * /. Division truncates toward zero (Java's normal int division).\nThe expression is always valid.\n\nExample: [\"2\", \"1\", \"+\", \"3\", \"*\"] -> 9"
+    },
+    {
+      "id": "k27",
+      "title": "Rotting Oranges (multi-source BFS)",
+      "pattern": "p07_bfs_grid",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p07_bfs_grid/RottingOranges.java",
+      "test": "drills.p07_bfs_grid.RottingOrangesTest",
+      "statement": "0 = empty, 1 = fresh orange, 2 = rotten orange. Every minute, fresh oranges next to a rotten one\n(up/down/left/right) become rotten. Return the minutes until no fresh orange is left, or -1 if\nsome fresh orange can never rot.\n\nExample: [[2,1,1],[1,1,0],[0,1,1]] -> 4\nHint: put ALL rotten oranges in the queue at the start, then BFS level by level."
+    },
+    {
+      "id": "k31",
+      "title": "Non-overlapping Intervals",
+      "pattern": "p08_sort_greedy",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p08_sort_greedy/NonOverlappingIntervals.java",
+      "test": "drills.p08_sort_greedy.NonOverlappingIntervalsTest",
+      "statement": "Return the minimum number of intervals to remove so the rest do not overlap.\nTouching intervals ([1,2] and [2,3]) do NOT overlap.\n\nExample: [[1,2],[2,3],[3,4],[1,3]] -> 1\nHint: sort by END time and greedily keep the interval that finishes first."
+    },
+    {
+      "id": "k35",
+      "title": "House Robber",
+      "pattern": "p09_dp",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p09_dp/HouseRobber.java",
+      "test": "drills.p09_dp.HouseRobberTest",
+      "statement": "You cannot take money from two adjacent houses. Return the maximum total you can take.\nMust be O(n): one test has 100,000 houses.\n\nExample: [2, 7, 9, 3, 1] -> 12 (2 + 9 + 1); [2, 1, 1, 2] -> 4"
+    },
+    {
+      "id": "k40",
+      "title": "Merge K Sorted Arrays",
+      "pattern": "p10_heap",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p10_heap/MergeKSorted.java",
+      "test": "drills.p10_heap.MergeKSortedTest",
+      "statement": "Each array is sorted ascending (some may be empty). Return one sorted array with every element.\nAim for O(N log k) with a min-heap holding one \"next element\" per array.\n\nExample: [[1,4,5],[1,3,4],[2,6]] -> [1,1,2,3,4,4,5,6]"
+    },
+    {
+      "id": "k44",
+      "title": "Longest Common Prefix",
+      "pattern": "p11_strings",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p11_strings/LongestCommonPrefix.java",
+      "test": "drills.p11_strings.LongestCommonPrefixTest",
+      "statement": "Return the longest prefix shared by every string in the array (\"\" if none or if the array is empty).\n\nExample: [flower, flow, flight] -> \"fl\""
+    },
+    {
+      "id": "k04",
+      "title": "Group Anagrams",
+      "pattern": "p01_hashing",
+      "level": "Medium",
+      "target": 8,
+      "file": "src/main/java/drills/p01_hashing/GroupAnagrams.java",
+      "test": "drills.p01_hashing.GroupAnagramsTest",
+      "statement": "Group the words that are anagrams of each other. Groups appear in the order their first word\nappears in the input, and words inside a group keep their input order.\n\nExample: [eat, tea, tan, ate, nat, bat] -> [[eat, tea, ate], [tan, nat], [bat]]\nHint: a sorted copy of the letters makes a good map key. LinkedHashMap keeps insertion order."
+    },
+    {
+      "id": "k08",
+      "title": "Container With Most Water",
+      "pattern": "p02_two_pointers",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p02_two_pointers/ContainerWithMostWater.java",
+      "test": "drills.p02_two_pointers.ContainerWithMostWaterTest",
+      "statement": "h[i] is the height of a vertical line at x = i. Pick two lines; the water they hold is\nmin(h[i], h[j]) * (j - i). Return the maximum. Must be O(n): one test has 100,000 lines.\n\nExample: [1,8,6,2,5,4,8,3,7] -> 49"
+    },
+    {
+      "id": "k12",
+      "title": "Longest Repeating Character Replacement",
+      "pattern": "p03_sliding_window",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p03_sliding_window/CharacterReplacement.java",
+      "test": "drills.p03_sliding_window.CharacterReplacementTest",
+      "statement": "s has only uppercase A-Z. You may change at most k characters to any other uppercase letter.\nReturn the length of the longest substring that can be made of one repeated letter.\n\nExample: \"ABAB\", k = 2 -> 4; \"AABABBA\", k = 1 -> 4\nHint: a window is valid while (window length - count of its most common letter) <= k."
+    },
+    {
+      "id": "k16",
+      "title": "Product of Array Except Self",
+      "pattern": "p04_prefix_sums",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p04_prefix_sums/ProductExceptSelf.java",
+      "test": "drills.p04_prefix_sums.ProductExceptSelfTest",
+      "statement": "Return out where out[i] is the product of every element except nums[i]. Do it in O(n)\nWITHOUT division (think: product of everything to the left times everything to the right).\nThe answer always fits in an int.\n\nExample: [1, 2, 3, 4] -> [24, 12, 8, 6]"
+    },
+    {
+      "id": "k20",
+      "title": "Koko Eating Bananas (search on the answer)",
+      "pattern": "p05_binary_search",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p05_binary_search/KokoBananas.java",
+      "test": "drills.p05_binary_search.KokoBananasTest",
+      "statement": "piles[i] bananas in each pile. At speed k Koko eats up to k bananas from ONE pile per hour\n(a pile of 7 at speed 3 takes 3 hours). Return the minimum integer k to finish all piles\nwithin h hours (h >= piles.length). Piles go up to 1,000,000,000 - total hours can overflow\nan int, and so can p + k - 1.\n\nExample: [3, 6, 7, 11], h = 8 -> 4"
+    },
+    {
+      "id": "k24",
+      "title": "Min Stack (design a class)",
+      "pattern": "p06_stack",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p06_stack/MinStack.java",
+      "test": "drills.p06_stack.MinStackTest",
+      "statement": "Implement a stack that supports push, pop, top and getMin - ALL in O(1).\npop/top/getMin are only called on a non-empty stack.\n\nHint: store each value together with the minimum at the time it was pushed."
+    },
+    {
+      "id": "k28",
+      "title": "Flood Fill",
+      "pattern": "p07_bfs_grid",
+      "level": "Easy",
+      "target": 8,
+      "file": "src/main/java/drills/p07_bfs_grid/FloodFill.java",
+      "test": "drills.p07_bfs_grid.FloodFillTest",
+      "statement": "Starting from pixel (sr, sc), recolor it and every pixel connected to it (up/down/left/right)\nthat has the SAME original color, to the new color. Return the image (modify in place is fine).\nTraps: if the new color equals the old one, do nothing (otherwise you loop forever), and one test\nis 1000 x 1000 - recursion will overflow the stack."
+    },
+    {
+      "id": "k32",
+      "title": "Largest Number (custom comparator)",
+      "pattern": "p08_sort_greedy",
+      "level": "Medium",
+      "target": 10,
+      "file": "src/main/java/drills/p08_sort_greedy/LargestNumber.java",
+      "test": "drills.p08_sort_greedy.LargestNumberTest",
+      "statement": "Arrange the non-negative numbers so that, concatenated, they form the largest number.\nReturn it as a String.\n\nExample: [3, 30, 34, 5, 9] -> \"9534330\"; [0, 0] -> \"0\"\nHint: put a before b when (a + b) > (b + a) as strings."
+    },
+    {
+      "id": "k36",
+      "title": "Longest Common Subsequence",
+      "pattern": "p09_dp",
+      "level": "Medium",
+      "target": 15,
+      "file": "src/main/java/drills/p09_dp/LongestCommonSubsequence.java",
+      "test": "drills.p09_dp.LongestCommonSubsequenceTest",
+      "statement": "Return the length of the longest subsequence common to a and b (characters in order, not\nnecessarily contiguous). One test has two strings of length 3,000.\n\nExample: (\"abcde\", \"ace\") -> 3\nHint: dp[i][j] = LCS of the first i chars of a and the first j chars of b."
+    },
+    {
+      "id": "k41",
+      "title": "Last Stone Weight",
+      "pattern": "p10_heap",
+      "level": "Easy",
+      "target": 6,
+      "file": "src/main/java/drills/p10_heap/LastStoneWeight.java",
+      "test": "drills.p10_heap.LastStoneWeightTest",
+      "statement": "Repeatedly smash the two heaviest stones x <= y: if x == y both are destroyed, otherwise a stone\nof weight y - x remains. Return the weight of the last stone, or 0 if none are left.\n\nExample: [2, 7, 4, 1, 8, 1] -> 1"
+    },
+    {
+      "id": "k45",
+      "title": "String Rotation",
+      "pattern": "p11_strings",
+      "level": "Easy",
+      "target": 5,
+      "file": "src/main/java/drills/p11_strings/StringRotation.java",
+      "test": "drills.p11_strings.StringRotationTest",
+      "statement": "Return true if b can be obtained by rotating a (moving some prefix of a to its end).\n\nExample: (\"waterbottle\", \"erbottlewat\") -> true, (\"abc\", \"acb\") -> false\nHint: every rotation of a appears inside a + a."
+    },
+    {
+      "id": "k37",
+      "title": "Unique Paths with Obstacles",
+      "pattern": "p09_dp",
+      "level": "Medium",
+      "target": 12,
+      "file": "src/main/java/drills/p09_dp/UniquePathsObstacles.java",
+      "test": "drills.p09_dp.UniquePathsObstaclesTest",
+      "statement": "Move only right or down from the top-left to the bottom-right cell. 1 = obstacle, 0 = open.\nReturn the number of distinct paths (fits in an int).\n\nExample: [[0,0,0],[0,1,0],[0,0,0]] -> 2"
+    }
+  ]
+}

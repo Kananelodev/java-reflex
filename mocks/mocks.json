@@ -1,0 +1,83 @@
+{
+  "mock1": {
+    "minutes": 75,
+    "about": "Warm-up shape: string parsing, intervals, grid BFS with a twist",
+    "questions": [
+      {
+        "dir": "mocks/mock1/q1_word_stats",
+        "title": "Word Stats",
+        "level": "Easy",
+        "points": 20,
+        "cases": 9
+      },
+      {
+        "dir": "mocks/mock1/q2_busy_blocks",
+        "title": "Busy Blocks",
+        "level": "Medium",
+        "points": 35,
+        "cases": 9
+      },
+      {
+        "dir": "mocks/mock1/q3_warehouse_robot",
+        "title": "Warehouse Robot",
+        "level": "Hard",
+        "points": 45,
+        "cases": 11
+      }
+    ]
+  },
+  "mock2": {
+    "minutes": 75,
+    "about": "Stack, prefix sums + hashing, dynamic programming",
+    "questions": [
+      {
+        "dir": "mocks/mock2/q1_brackets",
+        "title": "Bracket Check",
+        "level": "Easy",
+        "points": 20,
+        "cases": 7
+      },
+      {
+        "dir": "mocks/mock2/q2_target_subarrays",
+        "title": "Target Subarrays",
+        "level": "Medium",
+        "points": 35,
+        "cases": 9
+      },
+      {
+        "dir": "mocks/mock2/q3_coin_machine",
+        "title": "Coin Machine",
+        "level": "Hard",
+        "points": 45,
+        "cases": 10
+      }
+    ]
+  },
+  "mock3": {
+    "minutes": 75,
+    "about": "String building, counting + custom sort, binary search on the answer",
+    "questions": [
+      {
+        "dir": "mocks/mock3/q1_rle_decode",
+        "title": "Decode the Log",
+        "level": "Easy",
+        "points": 20,
+        "cases": 10
+      },
+      {
+        "dir": "mocks/mock3/q2_top_k_words",
+        "title": "Trending Words",
+        "level": "Medium",
+        "points": 35,
+        "cases": 9
+      },
+      {
+        "dir": "mocks/mock3/q3_ship_in_days",
+        "title": "Ship Within D Days",
+        "level": "Hard",
+        "points": 45,
+        "cases": 10
+      }
+    ]
+  }
+}

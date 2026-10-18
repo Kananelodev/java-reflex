@@ -1,0 +1,528 @@
+#!/usr/bin/env python3
+"""drill - spaced-repetition trainer for Java coding assessments.
+
+Run `./drill help` (or `python drill help` on Windows) for the commands.
+Progress lives in progress.json - commit it so your history shows the work.
+"""
+import datetime as dt
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+MANIFEST = os.path.join(ROOT, "drills.json")
+MOCKS = os.path.join(ROOT, "mocks", "mocks.json")
+PROGRESS = os.path.join(ROOT, "progress.json")
+
+INTERVALS = {  # box -> days until the next review after a fast pass
+    "normal": {1: 1, 2: 2, 3: 4, 4: 8, 5: 16},
+    "sprint": {1: 1, 2: 1, 3: 2, 4: 3, 5: 4},
+}
+REFLEX_DAYS = 3          # fast passes on this many different days = reflex
+SLOW_FACTOR = 2.0        # beyond target x this, a pass is "slow"
+CASE_TIMEOUT = 4.0       # seconds per mock test case
+
+# ----------------------------------------------------------------- output helpers
+TTY = sys.stdout.isatty() and os.name != "nt" or os.environ.get("FORCE_COLOR")
+def c(code, s): return f"\033[{code}m{s}\033[0m" if TTY else s
+def green(s): return c("32", s)
+def red(s): return c("31", s)
+def yellow(s): return c("33", s)
+def bold(s): return c("1", s)
+def dim(s): return c("2", s)
+
+
+def today():
+    override = os.environ.get("DRILL_TODAY")   # lets you (and the self-test) simulate other days
+    return dt.date.fromisoformat(override) if override else dt.date.today()
+
+
+def now():
+    override = os.environ.get("DRILL_NOW")
+    return float(override) if override else time.time()
+
+
+# ----------------------------------------------------------------- data
+def load_manifest():
+    with open(MANIFEST) as f:
+        m = json.load(f)
+    return m["patterns"], m["drills"], {d["id"]: d for d in m["drills"]}
+
+
+def load_mocks():
+    with open(MOCKS) as f:
+        return json.load(f)
+
+
+def load_state():
+    if os.path.exists(PROGRESS):
+        with open(PROGRESS) as f:
+            return json.load(f)
+    return {"mode": "sprint", "new_per_day": 6, "active": None, "items": {}, "mocks": {}, "active_mock": None}
+
+
+def save_state(st):
+    with open(PROGRESS, "w") as f:
+        json.dump(st, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+
+def item(st, did):
+    return st["items"].setdefault(did, {"box": 0, "due": None, "attempts": [], "fast_days": []})
+
+
+def is_reflex(it):
+    return len(set(it.get("fast_days", []))) >= REFLEX_DAYS
+
+
+def stub_path(d):
+    return os.path.join(ROOT, ".stubs", d["file"].replace("src/main/java/", ""))
+
+
+def solution_path(d):
+    return os.path.join(ROOT, "solutions", d["file"].replace("src/main/java/", ""))
+
+
+# ----------------------------------------------------------------- scheduling
+def queue(st, drills):
+    t = today().isoformat()
+    due, fresh = [], []
+    introduced_today = sum(1 for it in st["items"].values()
+                           if it["attempts"] and it["attempts"][0]["date"] == t)
+    slots = max(0, st["new_per_day"] - introduced_today)
+    for d in drills:
+        it = st["items"].get(d["id"])
+        if it and it["attempts"]:
+            if it["due"] and it["due"] <= t:
+                due.append((it["box"], it["due"], d))
+        elif len(fresh) < slots:
+            fresh.append(d)
+    due.sort(key=lambda x: (x[0], x[1]))
+    return [x[2] for x in due], fresh
+
+
+def record(st, d, result, minutes):
+    it = item(st, d["id"])
+    t = today()
+    it["attempts"].append({"date": t.isoformat(), "result": result, "minutes": round(minutes, 1)})
+    intervals = INTERVALS[st["mode"]]
+    if result == "fast":
+        it["box"] = min(it["box"] + 1, 5)
+        if t.isoformat() not in it["fast_days"]:
+            it["fast_days"].append(t.isoformat())
+        it["due"] = (t + dt.timedelta(days=intervals[it["box"]])).isoformat()
+    elif result == "slow":
+        it["box"] = max(it["box"], 1)
+        it["due"] = (t + dt.timedelta(days=1)).isoformat()
+    else:  # fail / peeked
+        it["box"] = 1
+        it["due"] = (t + dt.timedelta(days=1)).isoformat()
+    return it
+
+
+# ----------------------------------------------------------------- kata commands
+def reset_to_stub(d):
+    shutil.copyfile(stub_path(d), os.path.join(ROOT, d["file"]))
+
+
+def cmd_today(st, drills, by_id, patterns):
+    due, fresh = queue(st, drills)
+    print(bold(f"\nToday - {today().isoformat()}   mode: {st['mode']}"))
+    if st.get("active"):
+        a = by_id[st["active"]["id"]]
+        mins = (now() - st["active"]["started"]) / 60
+        print(yellow(f"  In progress: {a['id']} {a['title']} ({mins:.0f} min so far) -> ./drill check"))
+    if not due and not fresh:
+        print(green("  Nothing due. Run a mock (./drill mocks) or come back tomorrow."))
+        return
+    if due:
+        print(bold("\n  Reviews due (do these first):"))
+        for d in due:
+            it = st["items"][d["id"]]
+            print(f"    {d['id']}  {d['title']:<48} box {it['box']}  target {d['target']}m")
+    if fresh:
+        print(bold("\n  New today:"))
+        for d in fresh:
+            print(f"    {d['id']}  {d['title']:<48} {patterns[d['pattern']].split(' (')[0]}  target {d['target']}m")
+    nxt = (due or fresh)[0]
+    print(dim(f"\n  Next: ./drill start {nxt['id']}\n"))
+
+
+def cmd_start(st, drills, by_id, args):
+    if not args:
+        due, fresh = queue(st, drills)
+        if not (due or fresh):
+            print("Nothing due today. Pick one with ./drill start <id>  (see ./drill list)")
+            return
+        did = (due or fresh)[0]["id"]
+    else:
+        did = args[0].lower()
+    if did not in by_id:
+        sys.exit(red(f"Unknown drill '{did}'. See ./drill list"))
+    d = by_id[did]
+    if st.get("active") and st["active"]["id"] != did:
+        prev = by_id[st["active"]["id"]]
+        reset_to_stub(prev)
+        print(dim(f"(Abandoned {prev['id']} - reset it to the stub. Use ./drill giveup next time to log it.)"))
+    reset_to_stub(d)
+    st["active"] = {"id": did, "started": now()}
+    save_state(st)
+    print(bold(f"\n{d['id'].upper()} - {d['title']}   [{d['level']}, target {d['target']} min]\n"))
+    print(d["statement"])
+    print(dim(f"\n  File:  {d['file']}  (reset to a blank stub)"))
+    print(dim("  Write it from scratch, then: ./drill check   |   stuck: ./drill giveup   |   answer: ./drill solution\n"))
+
+
+def run_tests(d):
+    custom = os.environ.get("DRILL_TEST_CMD")
+    if custom:
+        cmd = custom.replace("{test}", d["test"])
+        proc = subprocess.run(cmd, shell=True, cwd=ROOT, capture_output=True, text=True)
+    else:
+        mvn = shutil.which("mvn") or shutil.which("mvn.cmd")
+        if not mvn:
+            sys.exit(red("Maven (mvn) is not on your PATH. Install it, or open the project in IntelliJ and run the test there."))
+        cls = d["test"].split(".")[-1]
+        proc = subprocess.run([mvn, "-q", "test", f"-Dtest={cls}", "-Dsurefire.failIfNoSpecifiedTests=false"],
+                              cwd=ROOT, capture_output=True, text=True)
+    return proc.returncode == 0, (proc.stdout + proc.stderr)
+
+
+def summarize_failure(out):
+    keep = []
+    for line in out.splitlines():
+        if "JAVA_TOOL_OPTIONS" in line:
+            continue
+        s = line.strip()
+        if ("Test." in s and (":" in s or "»" in s)) or "COMPILATION ERROR" in s or ".java:[" in s \
+                or s.startswith("FAIL") or "expected" in s or "Timeout" in s or "timed out" in s:
+            keep.append("  " + s.replace("[ERROR]", "").strip())
+    if not keep:
+        keep = ["  " + l for l in out.strip().splitlines()[-25:]]
+    return "\n".join(dict.fromkeys(keep[:30]))
+
+
+def cmd_check(st, drills, by_id, args):
+    did = args[0].lower() if args else (st.get("active") or {}).get("id")
+    if not did:
+        sys.exit("Nothing in progress. ./drill start <id> first.")
+    d = by_id[did]
+    print(dim(f"Running {d['test']} ..."))
+    ok, out = run_tests(d)
+    active = st.get("active") if st.get("active") and st["active"]["id"] == did else None
+    if not ok:
+        print(red("\nNot yet - failing tests:\n"))
+        print(summarize_failure(out))
+        if "COMPILATION ERROR" in out or ".java:[" in out:
+            print(yellow("\n  It doesn't compile. Read the first error above (file and line)."))
+        print(dim("\n  Keep going and ./drill check again. The clock is still running."))
+        return
+    if not active:
+        print(green("All tests pass.") + dim(" (Not timed - use ./drill start to log an attempt.)"))
+        return
+    minutes = (now() - active["started"]) / 60
+    result = "fast" if minutes <= d["target"] else "slow"
+    if minutes > d["target"] * SLOW_FACTOR:
+        result = "slow"
+    it = record(st, d, result, minutes)
+    st["active"] = None
+    save_state(st)
+    if result == "fast":
+        days = len(set(it["fast_days"]))
+        msg = green(f"\nPASS in {minutes:.1f} min (target {d['target']}) - box {it['box']}, next review {it['due']}.")
+        print(msg)
+        if days >= REFLEX_DAYS:
+            print(green(bold(f"  {d['id']} is a REFLEX now ({days} fast days).")))
+        else:
+            print(f"  Fast passes on {days}/{REFLEX_DAYS} different days toward reflex.")
+    else:
+        print(yellow(f"\nPASS but slow: {minutes:.1f} min vs target {d['target']}. Back tomorrow - speed comes from repetition."))
+    reset_to_stub(d)
+    print(dim("  (File reset to the stub so the next attempt starts blank.)"))
+
+
+def cmd_giveup(st, drills, by_id, args, peeked=False):
+    did = args[0].lower() if args else (st.get("active") or {}).get("id")
+    if not did:
+        sys.exit("Nothing in progress.")
+    d = by_id[did]
+    if st.get("active") and st["active"]["id"] == did:
+        minutes = (now() - st["active"]["started"]) / 60
+        record(st, d, "peeked" if peeked else "fail", minutes)
+        st["active"] = None
+        save_state(st)
+        print(yellow(f"Logged {did} as {'peeked' if peeked else 'failed'} - it comes back tomorrow (box 1)."))
+
+
+def cmd_solution(st, drills, by_id, args):
+    did = args[0].lower() if args else (st.get("active") or {}).get("id")
+    if not did:
+        sys.exit("Usage: ./drill solution <id>")
+    d = by_id[did]
+    if st.get("active") and st["active"]["id"] == did:
+        cmd_giveup(st, drills, by_id, [did], peeked=True)
+    with open(solution_path(d)) as f:
+        print(f.read())
+    print(dim("Read it, close it, then re-type it from memory tomorrow when it comes back."))
+
+
+def bar(n, total, width=20):
+    filled = int(round(width * n / total)) if total else 0
+    return "#" * filled + "." * (width - filled)
+
+
+def cmd_board(st, drills, by_id, patterns):
+    print(bold(f"\nScorecard - {today().isoformat()}\n"))
+    total_reflex = 0
+    for p, label in patterns.items():
+        ds = [d for d in drills if d["pattern"] == p]
+        rf = sum(1 for d in ds if is_reflex(st["items"].get(d["id"], {"fast_days": []})))
+        tried = sum(1 for d in ds if st["items"].get(d["id"], {}).get("attempts"))
+        total_reflex += rf
+        line = f"  {label.split(' (')[0]:<28} [{bar(rf, len(ds), 12)}] {rf:>2}/{len(ds):<2} reflex   {tried:>2} tried"
+        print(green(line) if rf == len(ds) else line)
+    print(bold(f"\n  Overall: {total_reflex}/{len(drills)} reflex  [{bar(total_reflex, len(drills), 30)}]"))
+    days = sorted({a["date"] for it in st["items"].values() for a in it["attempts"]})
+    streak, d0 = 0, today()
+    while d0.isoformat() in days:
+        streak += 1
+        d0 -= dt.timedelta(days=1)
+    attempts = [a for it in st["items"].values() for a in it["attempts"]]
+    fast = sum(1 for a in attempts if a["result"] == "fast")
+    print(f"  Attempts: {len(attempts)}  (fast {fast})   Practice days: {len(days)}   Streak: {streak}")
+    if st["mocks"]:
+        print(bold("\n  Mocks:"))
+        for m, runs in sorted(st["mocks"].items()):
+            best = max(runs, key=lambda r: r["score"])
+            print(f"    {m}: best {best['score']}/100 in {best['minutes']:.0f} min  ({len(runs)} run{'s' if len(runs) > 1 else ''})")
+    print()
+
+
+def cmd_list(st, drills, by_id, patterns, args):
+    want = args[0] if args else None
+    for p, label in patterns.items():
+        if want and want not in p:
+            continue
+        print(bold(f"\n{label}"))
+        for d in drills:
+            if d["pattern"] != p:
+                continue
+            it = st["items"].get(d["id"])
+            if it and is_reflex(it):
+                tag = green("reflex")
+            elif it and it["attempts"]:
+                tag = f"box {it['box']}, due {it['due']}"
+            else:
+                tag = dim("new")
+            print(f"  {d['id']}  {d['title']:<48} {d['level']:<7} {d['target']:>2}m  {tag}")
+    print()
+
+
+# ----------------------------------------------------------------- mocks
+def mock_dirs(mocks, m):
+    if m not in mocks:
+        sys.exit(red(f"Unknown mock '{m}'. Options: {', '.join(mocks)}"))
+    return mocks[m]["questions"]
+
+
+def norm(text):
+    lines = [l.rstrip() for l in text.replace("\r\n", "\n").split("\n")]
+    while lines and not lines[-1]:
+        lines.pop()
+    return lines
+
+
+def judge_question(q):
+    qdir = os.path.join(ROOT, q["dir"])
+    src = os.path.join(qdir, "Solution.java")
+    with tempfile.TemporaryDirectory() as tmp:
+        comp = subprocess.run(["javac", "-d", tmp, src], capture_output=True, text=True)
+        if comp.returncode != 0:
+            err = "\n".join(l for l in comp.stderr.splitlines() if "JAVA_TOOL_OPTIONS" not in l)
+            return 0, q["cases"], ["compile error:\n" + err[:800]]
+        cases = sorted(f[:-3] for f in os.listdir(os.path.join(qdir, "cases")) if f.endswith(".in"))
+        passed, notes = 0, []
+        for case in cases:
+            with open(os.path.join(qdir, "cases", case + ".in")) as f:
+                inp = f.read()
+            with open(os.path.join(qdir, "cases", case + ".out")) as f:
+                expected = f.read()
+            try:
+                run = subprocess.run(["java", "-cp", tmp, "Solution"], input=inp, capture_output=True,
+                                     text=True, timeout=CASE_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                notes.append(f"case {case}: time limit exceeded ({CASE_TIMEOUT:.0f}s)")
+                continue
+            if run.returncode != 0:
+                err = [l for l in run.stderr.splitlines() if "JAVA_TOOL_OPTIONS" not in l]
+                notes.append(f"case {case}: runtime error - {err[0] if err else 'exit ' + str(run.returncode)}")
+                continue
+            if norm(run.stdout) == norm(expected):
+                passed += 1
+            elif case == "01":
+                got = "\n".join(norm(run.stdout)[:10])
+                notes.append(f"case 01 (sample): wrong answer\n      expected: {' | '.join(norm(expected)[:6])}\n"
+                             f"      got:      {got.replace(chr(10), ' | ') or '(nothing printed)'}")
+            else:
+                notes.append(f"case {case}: wrong answer")
+        return passed, len(cases), notes
+
+
+def score_mock(mocks, m):
+    total, rows = 0.0, []
+    for q in mock_dirs(mocks, m):
+        p, n, notes = judge_question(q)
+        pts = q["points"] * p / n
+        total += pts
+        rows.append((q, p, n, pts, notes))
+    return round(total), rows
+
+
+def cmd_mocks(st, mocks):
+    print(bold("\nMock assessments (75 minutes, 3 questions, partial marks per test case)\n"))
+    for m, info in mocks.items():
+        runs = st["mocks"].get(m, [])
+        best = f"best {max(r['score'] for r in runs)}/100" if runs else dim("not attempted")
+        print(f"  {m}: {info['about']}   {best}")
+    print(dim("\n  ./drill mock mock1   then   ./drill mock-check   then   ./drill mock-submit\n"))
+
+
+def cmd_mock(st, mocks, args):
+    if not args:
+        return cmd_mocks(st, mocks)
+    m = args[0]
+    qs = mock_dirs(mocks, m)
+    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+    for q in qs:   # back up any previous attempt, then reset to the stub
+        cur = os.path.join(ROOT, q["dir"], "Solution.java")
+        stub = os.path.join(ROOT, ".stubs", q["dir"], "Solution.java")
+        with open(cur) as a, open(stub) as b:
+            if a.read() != b.read():
+                bak = os.path.join(ROOT, ".attempts", m, stamp, os.path.basename(q["dir"]))
+                os.makedirs(bak, exist_ok=True)
+                shutil.copyfile(cur, os.path.join(bak, "Solution.java"))
+        shutil.copyfile(stub, cur)
+    st["active_mock"] = {"id": m, "started": now()}
+    save_state(st)
+    print(bold(f"\n{m} started - you have {mocks[m]['minutes']} minutes. Clock is running.\n"))
+    for i, q in enumerate(qs, 1):
+        print(f"  Q{i}  {q['title']:<22} {q['level']:<7} {q['points']} pts   {q['dir']}/PROBLEM.md")
+    print(dim("\n  Read all three first. ./drill mock-check to test, ./drill mock-submit when done.\n"))
+
+
+def print_rows(rows):
+    for q, p, n, pts, notes in rows:
+        status = green if p == n else (yellow if p else red)
+        print(status(f"  {q['title']:<22} {p:>2}/{n:<2} cases   {pts:5.1f}/{q['points']} pts"))
+        for note in notes[:4]:
+            print(dim("      " + note))
+        if len(notes) > 4:
+            print(dim(f"      ... and {len(notes) - 4} more"))
+
+
+def cmd_mock_check(st, mocks, args, submit=False):
+    m = args[0] if args else (st.get("active_mock") or {}).get("id")
+    if not m:
+        sys.exit("No mock running. ./drill mock mock1")
+    print(dim("Judging (compiles each Solution.java and runs every case)..."))
+    score, rows = score_mock(mocks, m)
+    am = st.get("active_mock")
+    minutes = (now() - am["started"]) / 60 if am and am["id"] == m else None
+    print()
+    print_rows(rows)
+    clock = f"   time {minutes:.0f}/{mocks[m]['minutes']} min" if minutes is not None else ""
+    print(bold(f"\n  Score: {score}/100{clock}\n"))
+    if minutes is not None and minutes > mocks[m]["minutes"]:
+        print(yellow("  Over time - in the real test the timer would have submitted for you.\n"))
+    if submit:
+        if minutes is None:
+            sys.exit("This mock isn't running - start it with ./drill mock " + m)
+        st["mocks"].setdefault(m, []).append({"date": today().isoformat(), "score": score, "minutes": round(minutes, 1)})
+        st["active_mock"] = None
+        save_state(st)
+        print(green(f"  Submitted {m}: {score}/100. Compare with the reference in solutions/{'/'.join(rows[0][0]['dir'].split('/')[:2])}/\n"))
+
+
+# ----------------------------------------------------------------- settings
+def cmd_mode(st, args):
+    if not args or args[0] not in INTERVALS:
+        sys.exit("Usage: ./drill mode sprint|normal")
+    st["mode"] = args[0]
+    save_state(st)
+    print(f"Mode set to {args[0]}: review gaps {INTERVALS[args[0]]} days by box.")
+
+
+def cmd_new(st, args):
+    if not args or not args[0].isdigit():
+        sys.exit("Usage: ./drill new <how many new drills per day>")
+    st["new_per_day"] = int(args[0])
+    save_state(st)
+    print(f"New drills per day: {args[0]}")
+
+
+HELP = """
+drill - train Java problem patterns until they are reflexes
+
+  ./drill                  today's queue: reviews due + new drills
+  ./drill start [id]       reset a drill to a blank stub and start the clock (no id = next in queue)
+  ./drill check            run its tests; a pass is logged with your time
+  ./drill giveup           log a failed attempt (it returns tomorrow)
+  ./drill solution [id]    show the reference solution (counts as a fail if in progress)
+  ./drill board            scorecard: reflex count per pattern, streak, mock scores
+  ./drill list [pattern]   every drill with its status
+
+  ./drill mocks            list the timed mock assessments
+  ./drill mock <mockN>     start a 75-minute mock (resets its Solution.java files)
+  ./drill mock-check       judge your current solutions (partial marks per case)
+  ./drill mock-submit      judge and record the final score
+
+  ./drill mode sprint|normal   short review gaps before a deadline, longer ones after
+  ./drill new <n>              how many new drills to introduce per day (default 6)
+
+A drill becomes a REFLEX after passing under its target time on 3 different days.
+On Windows run it as:  python drill <command>
+"""
+
+
+def main():
+    args = sys.argv[1:]
+    cmd = args[0] if args else "today"
+    rest = args[1:]
+    patterns, drills, by_id = load_manifest()
+    st = load_state()
+    if cmd in ("today", "next"):
+        cmd_today(st, drills, by_id, patterns)
+    elif cmd == "start":
+        cmd_start(st, drills, by_id, rest)
+    elif cmd == "check":
+        cmd_check(st, drills, by_id, rest)
+    elif cmd == "giveup":
+        cmd_giveup(st, drills, by_id, rest)
+    elif cmd == "solution":
+        cmd_solution(st, drills, by_id, rest)
+    elif cmd == "board":
+        cmd_board(st, drills, by_id, patterns)
+    elif cmd == "list":
+        cmd_list(st, drills, by_id, patterns, rest)
+    elif cmd == "mocks":
+        cmd_mocks(st, load_mocks())
+    elif cmd == "mock":
+        cmd_mock(st, load_mocks(), rest)
+    elif cmd == "mock-check":
+        cmd_mock_check(st, load_mocks(), rest)
+    elif cmd == "mock-submit":
+        cmd_mock_check(st, load_mocks(), rest, submit=True)
+    elif cmd == "mode":
+        cmd_mode(st, rest)
+    elif cmd == "new":
+        cmd_new(st, rest)
+    else:
+        print(HELP)
+
+
+if __name__ == "__main__":
+    main()
