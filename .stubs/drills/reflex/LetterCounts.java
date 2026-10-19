@@ -14,7 +14,7 @@ import java.util.*;
 public class LetterCounts {
 
     public static int[] letterCounts(String s) {
-        // TODO
+        // TODO.
         return new int[26];
     }
 }
