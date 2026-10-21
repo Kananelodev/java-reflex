@@ -1,7 +1,7 @@
 package drills.p01_hashing;
 
-import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * K03 - First Unique Character  [Easy, target 5 min]
@@ -15,6 +15,21 @@ public class FirstUniqueChar {
 
     public static int firstUniqChar(String s) {
         // TODO
-        return -2;
+
+        Map<Character, Integer> seeMap = new HashMap<>();
+
+        for (int i = 0; i < s.length(); i++) {
+            seeMap.put(s.charAt(i), seeMap.getOrDefault(s.charAt(i), 0) + 1) ;
+            
+        }  
+        
+        for (int i = 0; i < s.length(); i++) {
+
+            if(seeMap.get(s.charAt(i)) == 1) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

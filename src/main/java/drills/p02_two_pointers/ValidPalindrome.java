@@ -1,8 +1,5 @@
 package drills.p02_two_pointers;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * K05 - Valid Palindrome  [Easy, target 6 min]
  *
@@ -15,6 +12,17 @@ public class ValidPalindrome {
 
     public static boolean isPalindrome(String s) {
         // TODO
-        return false;
+
+        s = s.toLowerCase();
+        s = s.replaceAll("[^a-z0-9]", "");
+        int n = s.length();
+
+        for (int i = 0; i<n/2; i++) {
+            if(s.charAt(i) != s.charAt(n-i-1)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

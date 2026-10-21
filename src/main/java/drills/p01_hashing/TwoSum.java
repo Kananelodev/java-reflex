@@ -1,7 +1,7 @@
 package drills.p01_hashing;
 
-import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * K02 - Two Sum (unsorted)  [Easy, target 6 min]
@@ -15,6 +15,21 @@ public class TwoSum {
 
     public static int[] twoSum(int[] nums, int target) {
         // TODO
+
+        Map<Integer, Integer> seen = new HashMap<>();
+        
+        for (int i = 0; i < nums.length; i++) {
+
+            int needed = target - nums[i];
+
+            if (seen.containsKey(needed)) {
+                return new int[] {seen.get(needed), i};
+
+                
+            }
+
+            seen.put(nums[i], i);
+        }
         return new int[0];
     }
 }

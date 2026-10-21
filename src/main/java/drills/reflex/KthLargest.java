@@ -1,7 +1,6 @@
 package drills.reflex;
 
-import java.io.*;
-import java.util.*;
+import java.util.PriorityQueue;
 
 /**
  * R09 - PriorityQueue min-heap of size k  [Reflex, target 3 min]
@@ -15,6 +14,37 @@ public class KthLargest {
 
     public static int kthLargest(int[] a, int k) {
         // TODO
-        return 0;
+
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+
+        for (int i : a) {
+            minHeap.add(i);
+
+            if (minHeap.size() > k) {
+            minHeap.poll();
+            }
+        }
+
+        
+
+
+        // Integer[] b = new Integer[a.length];
+
+        // for(int i = 0; i < a.length; i++) {
+        //     b[i] = a[i];
+        // }
+        // Arrays.sort(b, Collections.reverseOrder());
+
+        // Integer[] minHeap = Arrays.copyOf(b, k);
+
+        // int min = minHeap[0];
+
+        // for (int i = 1; i < minHeap.length; i++ ) {
+        //     if(minHeap[i] < min) {
+        //         min = minHeap[i];
+        //     }
+        // }
+
+        return minHeap.peek();
     }
 }

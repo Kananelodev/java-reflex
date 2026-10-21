@@ -1,7 +1,9 @@
 package drills.reflex;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.StringTokenizer;
 
 /**
  * R11 - BufferedReader + StringTokenizer  [Reflex, target 3 min]
@@ -18,6 +20,27 @@ public class FastInput {
     public static long sumFromInput(String input) throws IOException {
         BufferedReader br = new BufferedReader(new StringReader(input));
         // TODO
-        return 0;
+        
+        String firsline = br.readLine();
+
+        if(firsline == null) {
+            return 0;
+        }
+        int n = Integer.parseInt(firsline.trim());
+
+        String secondline = br.readLine();
+        if (secondline == null) {
+            return 0;
+        }
+
+        StringTokenizer st = new StringTokenizer(secondline);
+        long sum = 0;
+
+        for(int i = 0; i < n; i++) {
+            if(st.hasMoreTokens()) {
+                sum += Long.parseLong(st.nextToken());
+            }
+        }
+        return sum;
     }
 }

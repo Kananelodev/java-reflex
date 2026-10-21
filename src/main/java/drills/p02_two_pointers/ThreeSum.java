@@ -1,7 +1,6 @@
 package drills.p02_two_pointers;
 
-import java.io.*;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * K07 - 3Sum  [Medium, target 15 min]
@@ -15,8 +14,29 @@ import java.util.*;
  */
 public class ThreeSum {
 
-    public static List<List<Integer>> threeSum(int[] nums) {
-        // TODO
-        return new ArrayList<>();
+    public static int[] threeSum(int[] nums, int target) {
+        
+        Arrays.sort(nums);
+
+        int first = nums[0];
+
+        for(int i = 1; i < nums.length; i++) {
+
+            int left = nums[i];
+            int right = nums[i + 1];
+
+            if(left != right) {
+                int sum = left + right + first;
+
+                if(sum == 0) {
+                    
+                }
+
+            }
+        }
+        return null;
     }
-}
+};
+
+
+

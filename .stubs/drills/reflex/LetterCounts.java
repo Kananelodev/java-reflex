@@ -1,8 +1,5 @@
 package drills.reflex;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * R01 - Letter counts with int[26]  [Reflex, target 2 min]
  *
@@ -14,7 +11,8 @@ import java.util.*;
 public class LetterCounts {
 
     public static int[] letterCounts(String s) {
-        // TODO.
+        // TODO
+        
         return new int[26];
     }
 }

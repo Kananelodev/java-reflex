@@ -1,7 +1,6 @@
 package drills.p02_two_pointers;
 
-import java.io.*;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * K06 - Remove Duplicates from Sorted Array  [Easy, target 6 min]
@@ -13,8 +12,17 @@ import java.util.*;
  */
 public class RemoveDuplicates {
 
-    public static int removeDuplicates(int[] nums) {
+    public static int[] removeDuplicates(int[] nums) {
         // TODO
-        return -1;
+
+        int right = 1;
+
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] != nums[i - 1]) {
+                nums[right] = nums[i];
+                right++;
+            }
+        }
+        return Arrays.copyOf(nums, right);
     }
 }

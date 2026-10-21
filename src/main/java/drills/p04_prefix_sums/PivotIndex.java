@@ -1,7 +1,7 @@
 package drills.p04_prefix_sums;
 
-import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * K14 - Find Pivot Index  [Easy, target 6 min]
@@ -15,6 +15,13 @@ public class PivotIndex {
 
     public static int pivotIndex(int[] nums) {
         // TODO
+
+        ArrayList<Integer> yes = new ArrayList<>(); 
+        int sumleft = 0;
+
+        for (int i = 1; i < nums.length; i++) {
+            int[] left = Arrays.copyOfRange(nums, i - 1, i);
+        }
         return -2;
     }
 }
